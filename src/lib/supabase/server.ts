@@ -1,0 +1,4 @@
+import {createServerClient} from "@supabase/ssr"; import {createClient as createServiceClient} from "@supabase/supabase-js"; import {cookies} from "next/headers"; import {getPublicSupabaseEnv} from "./env";
+export async function createClient(){const cookieStore=await cookies();const{url,key}=getPublicSupabaseEnv();return createServerClient(url,key,{cookies:{getAll:()=>cookieStore.getAll(),setAll:(values)=>{try{values.forEach(({name,value,options})=>cookieStore.set(name,value,options))}catch{}}}})}
+export function createAdminClient(){const{url}=getPublicSupabaseEnv();const key=process.env.SUPABASE_SERVICE_ROLE_KEY;if(!key)throw new Error("Server configuration is incomplete.");return createServiceClient(url,key,{auth:{persistSession:false,autoRefreshToken:false}})}
+export async function requireAdmin(){const supabase=await createClient();const{data:{user}}=await supabase.auth.getUser();if(!user||user.app_metadata?.role!=="admin")return null;return user}

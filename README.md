@@ -1,36 +1,63 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Bangalore Startup Atlas
 
-## Getting Started
+A production-oriented Next.js 16 MVP for discovering verified Bangalore startups on a MapLibre map, reviewing community and scraper submissions, and selling four manually approved advertising placements through UPI.
 
-First, run the development server:
+## Included
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+- App Router, TypeScript, Tailwind CSS, MapLibre clustering, viewport queries, responsive dark design
+- Database-backed counts, filtered/paginated directory, profile metadata, sitemap, robots rules, structured data
+- Community startup submissions that remain private until admin approval
+- UPI advertising requests with validated uploads, private payment proofs, public creative assets, unique submission IDs, and an honest WhatsApp handoff
+- Supabase Auth admin gate, database RLS, private signed screenshots, payment verification separate from ad publication, four manual slots, audit logs
+- Modular Python collector with rate limiting, retries through `httpx`, deduplication, optional configured geocoder, export, dry-run, and a mandatory review queue
+
+## Local setup
+
+Requirements: Node.js 20.9+ and a Supabase project.
+
+```powershell
+npm install
+Copy-Item .env.example .env.local
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Fill `.env.local`. Never expose `SUPABASE_SERVICE_ROLE_KEY` or commit `.env.local`.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Apply [the initial migration](supabase/migrations/202611030001_initial_atlas.sql) with the Supabase CLI or SQL editor. The migration creates tables, four ad slots, indexes, constraints, RLS policies, and the `public-assets` and private `payment-proofs` buckets.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Create the first admin user in Supabase Auth, then set trusted app metadata from a secure server or the dashboard:
 
-## Learn More
+```json
+{ "role": "admin" }
+```
 
-To learn more about Next.js, take a look at the following resources:
+Authorization intentionally reads `app_metadata`, not user-editable metadata. Refresh the user session after changing the role.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```powershell
+npm run dev
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+No production data is fabricated. [supabase/seed.sql](supabase/seed.sql) contains one clearly fictional development-only marker and must not be run in production.
 
-## Deploy on Vercel
+## Production checks
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+```powershell
+npm run typecheck
+npm run lint
+npm run build
+```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Before release, test public queries, submissions, allowed/blocked upload types, private screenshot access, admin sign-in, payment approval, separate slot assignment, pause/remove, expiration, mobile map gestures, and empty/error states against a staging Supabase project.
+
+## Vercel deployment
+
+1. Import this repository in Vercel and select Next.js.
+2. Configure every variable from `.env.example` for the appropriate environments. Keep the service-role key server-only.
+3. Apply the Supabase migration before promoting the application.
+4. Deploy a preview, execute the checks above and the end-to-end admin/payment flow, then promote the tested production build.
+5. Set `NEXT_PUBLIC_SITE_URL` to the final HTTPS origin and rebuild so canonical metadata and sitemap URLs are correct.
+
+A live deployment is not created by this repository alone: Vercel and Supabase project access, credentials, UPI details, QR asset, and the WhatsApp number must be supplied by the owner.
+
+## Scraper
+
+See [scraper/README.md](scraper/README.md). It only collects public company-level information and cannot publish records without an explicit admin review.

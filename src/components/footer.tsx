@@ -1,0 +1,2 @@
+import Link from "next/link";
+export function Footer(){return <footer className="mt-20 border-t border-line py-10 text-sm text-muted"><div className="shell flex flex-col justify-between gap-5 sm:flex-row"><div><p className="font-semibold text-white">Bangalore Startup Atlas</p><p className="mt-1">An independent map of the city&apos;s startup ecosystem.</p></div><div className="flex gap-5"><Link href="/startups">Directory</Link><Link href="/advertise">Advertise</Link><Link href="/submit-startup">Submit</Link></div></div></footer>}

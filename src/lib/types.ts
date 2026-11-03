@@ -1,0 +1,3 @@
+export type Startup={id:string;name:string;slug:string;description:string|null;website:string|null;logo_url:string|null;industry:string;address:string|null;neighbourhood:string|null;latitude:number|null;longitude:number|null;location_verified:boolean;verified:boolean;source_url?:string|null;created_at?:string;updated_at?:string};
+export type Advertisement={id:string;request_id:string;startup_id:string|null;slot_id:string;title:string;description:string;image_url:string|null;website_url:string;starts_at:string;expires_at:string;status:string;advertisement_slots?:{slot_number:number;slot_name:string}|null};
+export type AtlasStats={startups:number;industries:number;featured:number};

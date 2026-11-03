@@ -96,8 +96,8 @@ grant select, insert, update, delete on all tables in schema public to authentic
 
 insert into public.advertisement_slots (slot_number, slot_name) values (1,'North'),(2,'East'),(3,'South'),(4,'West') on conflict (slot_number) do nothing;
 insert into storage.buckets (id,name,public,file_size_limit,allowed_mime_types) values
-  ('public-assets','public-assets',true,5000000,array['image/png','image/jpeg','image/webp','image/svg+xml']),
+  ('startup-assets','startup-assets',true,5000000,array['image/png','image/jpeg','image/webp','image/svg+xml']),
   ('payment-proofs','payment-proofs',false,5000000,array['image/png','image/jpeg','image/webp'])
 on conflict (id) do update set public=excluded.public,file_size_limit=excluded.file_size_limit,allowed_mime_types=excluded.allowed_mime_types;
-create policy "admins manage public assets" on storage.objects for all to authenticated using (bucket_id='public-assets' and (select public.is_admin())) with check (bucket_id='public-assets' and (select public.is_admin()));
+create policy "admins manage startup assets" on storage.objects for all to authenticated using (bucket_id='startup-assets' and (select public.is_admin())) with check (bucket_id='startup-assets' and (select public.is_admin()));
 create policy "admins manage private proofs" on storage.objects for all to authenticated using (bucket_id='payment-proofs' and (select public.is_admin())) with check (bucket_id='payment-proofs' and (select public.is_admin()));

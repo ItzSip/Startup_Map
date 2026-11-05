@@ -343,6 +343,9 @@ type ReviewItem = {
   website: string | null;
   description: string | null;
   source_url?: string | null;
+  latitude?: number | null;
+  longitude?: number | null;
+  location_verified?: boolean;
 };
 function ReviewList({
   items,
@@ -384,6 +387,13 @@ function ReviewList({
           </p>
           {x.source_url && (
             <p className="mt-2 text-xs text-muted">Source: {x.source_url}</p>
+          )}
+          {"location_verified" in x && (
+            <p className={`mt-2 text-xs ${x.location_verified ? "text-lime" : "text-amber-300"}`}>
+              {x.location_verified
+                ? `Confirmed coordinates: ${x.latitude}, ${x.longitude}`
+                : "Location needs confirmation before it can appear on the map."}
+            </p>
           )}
           <form action={action} className="mt-4 flex gap-2">
             <input type="hidden" name="id" value={x.id} />

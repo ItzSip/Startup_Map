@@ -8,8 +8,14 @@ def save_pending(records: list[dict]) -> tuple[int, int]:
     client=create_client(url,key); inserted=skipped=0
     existing=client.table("startups").select("name,website").execute().data or []
     existing += client.table("pending_scraped_startups").select("name,website").neq("review_status","rejected").execute().data or []
-    keys={fingerprint(item) for item in existing}
+    existing_fingerprints=[fingerprint(item) for item in existing]
+    names={name for name,_ in existing_fingerprints}
+    domains={website for _,website in existing_fingerprints if website}
     for record in records:
-        if fingerprint(record) in keys: skipped+=1; continue
-        client.table("pending_scraped_startups").insert(record).execute(); keys.add(fingerprint(record)); inserted+=1
+        name,website=fingerprint(record)
+        if name in names or (website and website in domains): skipped+=1; continue
+        client.table("pending_scraped_startups").insert(record).execute()
+        names.add(name)
+        if website: domains.add(website)
+        inserted+=1
     return inserted,skipped
